@@ -1,0 +1,197 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+class Contact {
+public:
+    std::string name;
+    std::string address;
+    std::string phone;
+    std::string email;
+
+    Contact(std::string n, std::string a, std::string p, std::string e)
+        : name(std::move(n)), address(std::move(a)), phone(std::move(p)), email(std::move(e)) {}
+};
+
+class ContactBook {
+private:
+    std::vector<Contact> contacts;
+
+public:
+    void addContact(const std::string& name, const std::string& address,
+                    const std::string& phone, const std::string& email) {
+        for (const auto& c : contacts) {
+            if (c.name == name) {
+                std::cout << "Error, contact already exists\n";
+                return;
+            }
+        }
+        contacts.emplace_back(name, address, phone, email);
+        std::cout << "Add Success!\n";
+    }
+
+    void deleteContact(const std::string& query) {
+        auto it = std::remove_if(contacts.begin(), contacts.end(), [&](const Contact& c) {
+            return c.name == query || c.phone == query || c.email == query;
+        });
+
+        if (it != contacts.end()) {
+            contacts.erase(it, contacts.end());
+            std::cout << "Delete Success!\n";
+        } else {
+            std::cout << "Not Found!\n";
+        }
+    }
+
+    void queryContact(const std::string& query) const {
+        for (const auto& c : contacts) {
+            if (c.name == query || c.phone == query || c.email == query) {
+                std::cout << "Name: " << c.name << "\n"
+                          << "Address: " << c.address << "\n"
+                          << "Phone: " << c.phone << "\n"
+                          << "Email: " << c.email << "\n";
+                return;
+            }
+        }
+        std::cout << "Not Found\n";
+    }
+
+    void modifyContact(const std::string& name) {
+        for (auto& c : contacts) {
+            if (c.name == name) {
+                int choice;
+                std::cout << "Information to be modified:\n";
+                std::cout << "1. Address\n2. Phone\n3. Email\n";
+                std::cin >> choice;
+                std::cin.ignore();
+
+                switch (choice) {
+                    case 1:
+                        std::cout << "New Address: ";
+                        std::getline(std::cin, c.address);
+                        break;
+                    case 2:
+                        std::cout << "New Phone: ";
+                        std::getline(std::cin, c.phone);
+                        break;
+                    case 3:
+                        std::cout << "New Email: ";
+                        std::getline(std::cin, c.email);
+                        break;
+                    default:
+                        std::cout << "Invalid Selection!\n";
+                        return;
+                }
+                std::cout << "Modify Success!\n";
+                return;
+            }
+        }
+        std::cout << "Not Found\n";
+    }
+
+    void displayContacts() const {
+        std::cout << "Contacts:\n";
+        for (const auto& c : contacts) {
+            std::cout << "Name: " << c.name << "\n"
+                      << "Address: " << c.address << "\n"
+                      << "Phone: " << c.phone << "\n"
+                      << "Email: " << c.email << "\n\n";
+        }
+    }
+
+    void sortContacts(int option) {
+        switch (option) {
+            case 1:
+                std::sort(contacts.begin(), contacts.end(), [](const Contact& a, const Contact& b) {
+                    return a.name < b.name;
+                });
+                break;
+            case 2:
+                std::sort(contacts.begin(), contacts.end(), [](const Contact& a, const Contact& b) {
+                    return a.address < b.address;
+                });
+                break;
+            case 3:
+                std::sort(contacts.begin(), contacts.end(), [](const Contact& a, const Contact& b) {
+                    return a.phone < b.phone;
+                });
+                break;
+            case 4:
+                std::sort(contacts.begin(), contacts.end(), [](const Contact& a, const Contact& b) {
+                    return a.email < b.email;
+                });
+                break;
+            default:
+                std::cout << "Invalid Sorting Option\n";
+                return;
+        }
+        std::cout << "Sort Success!\n";
+        displayContacts();
+    }
+};
+
+int main() {
+    std::cout << "~Personal Address Book Management System~\n";
+    std::cout << "Main Functions:\n";
+
+    ContactBook book;
+    int choice, sortOption;
+    std::string query;
+
+    do {
+        std::cout << "\n1. Add\n2. Delete\n3. Search\n4. Modify\n5. Show\n6. Sort\n7. Quit\n";
+        std::cout << "Please enter your choice: ";
+        std::cin >> choice;
+        std::cin.ignore();
+
+        switch (choice) {
+            case 1: {
+                std::string name, address, phone, email;
+                std::cout << "Please enter the name: ";
+                std::getline(std::cin, name);
+                std::cout << "Please enter the address: ";
+                std::getline(std::cin, address);
+                std::cout << "Please enter the phone number: ";
+                std::getline(std::cin, phone);
+                std::cout << "Please enter the email: ";
+                std::getline(std::cin, email);
+                book.addContact(name, address, phone, email);
+                break;
+            }
+            case 2:
+                std::cout << "Enter the name/phone/email to delete: ";
+                std::getline(std::cin, query);
+                book.deleteContact(query);
+                break;
+            case 3:
+                std::cout << "Enter the name/phone/email to search: ";
+                std::getline(std::cin, query);
+                book.queryContact(query);
+                break;
+            case 4:
+                std::cout << "Enter the name to modify: ";
+                std::getline(std::cin, query);
+                book.modifyContact(query);
+                break;
+            case 5:
+                book.displayContacts();
+                break;
+            case 6:
+                std::cout << "Sort Options:\n1. Name\n2. Address\n3. Phone\n4. Email\n";
+                std::cout << "Please enter the sorting option: ";
+                std::cin >> sortOption;
+                std::cin.ignore();
+                book.sortContacts(sortOption);
+                break;
+            case 7:
+                std::cout << "Quit!!!\n";
+                break;
+            default:
+                std::cout << "Invalid Selection\n";
+        }
+
+    } while (choice != 7);
+
+    return 0;
+}
